@@ -22,19 +22,19 @@ scene.add(axesHelper)
 // const material = new THREE.MeshBasicMaterial()
 const material = new THREE.MeshLambertMaterial()
 material.transparent = true
-material.opacity = 0.02
+material.opacity = 0.05
 
-const cubePerSide = 10
-for(let i = 0; i < cubePerSide; i++) {
-    for(let j = 0; j < cubePerSide; j++) {
-        for(let k = 0; k < cubePerSide; k++) {
-            if(k <= 3) {
-                const cube = new THREE.Mesh(new THREE.BoxGeometry(), material)
-                cube.position.x = (i + 0.5) - (cubePerSide * 0.5)
-                cube.position.z = (j + 0.5) - (cubePerSide * 0.5)
-                cube.position.y = (k + 0.5)
-                scene.add(cube)
-            }
+const cubesXSide = 6
+const cubesZSide = 7
+const cubesYSide = 3
+for(let x = 0; x < cubesXSide; x++) {
+    for(let z = 0; z < cubesZSide; z++) {
+        for(let y = 0; y < cubesYSide; y++) {
+            const cube = new THREE.Mesh(new THREE.BoxGeometry(), material)
+            cube.position.x = (x + 0.5) - (cubesXSide * 0.5)
+            cube.position.z = (z + 0.5) - (cubesZSide * 0.5)
+            cube.position.y = (y + 0.5)
+            scene.add(cube)
         }
     }
 }
@@ -47,8 +47,6 @@ dracoLoader.setDecoderPath('/draco/')
 
 const gltfLoader = new GLTFLoader()
 gltfLoader.setDRACOLoader(dracoLoader)
-
-let mixer = null
 
 gltfLoader.load(
     '/models/car.glb',
