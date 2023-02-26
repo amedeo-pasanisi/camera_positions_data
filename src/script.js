@@ -23,31 +23,60 @@ scene.add(axesHelper)
 const material = new THREE.MeshLambertMaterial()
 material.transparent = true
 material.opacity = 0.05
-
-const cubesXSide = 6
-const cubesZSide = 7
-const cubesYSide = 3
+const division = 2
+const cubeSize = 1 / division
+const cubesXSide = 5 * division
+const cubesZSide = 7 * division
+const cubesYSide = 2 * division
 for(let x = 0; x < cubesXSide; x++) {
     for(let z = 0; z < cubesZSide; z++) {
         for(let y = 0; y < cubesYSide; y++) {
-            const cube = new THREE.Mesh(new THREE.BoxGeometry(), material)
-            cube.position.x = (x + 0.5) - (cubesXSide * 0.5)
-            cube.position.z = (z + 0.5) - (cubesZSide * 0.5)
-            cube.position.y = (y + 0.5)
+            const cube = new THREE.Mesh(new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize), material)
+            cube.position.x = ((x * cubeSize) + (cubeSize * 0.5)) - (cubesXSide * (cubeSize * 0.5))
+            cube.position.z = ((z * cubeSize) + (cubeSize * 0.5)) - (cubesZSide * (cubeSize * 0.5))
+            cube.position.y = ((y * cubeSize) + (cubeSize * 0.5))
             scene.add(cube)
         }
     }
 }
 
 /**
+ * Particles
+ */
+const parameters = {}
+parameters.count = 1000
+parameters.size = 0.02
+
+const generateGalaxy = () => {
+    const geometry = new THREE.BufferGeometry()
+    const positions = new Float32Array(parameters.count * 3)
+    for(let i = 0; i < parameters.count; i++) {
+        const i3 = i * 3
+        positions[i3    ] = (Math.random() - 0.5) * (cubesXSide / division)
+        positions[i3 + 1] = (Math.random()      ) * (cubesYSide / division)
+        positions[i3 + 2] = (Math.random() - 0.5) * (cubesZSide / division)
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+    const material = new THREE.PointsMaterial({
+        size: parameters.size,
+        sizeAttenuation: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+    })
+
+    const points = new THREE.Points(geometry, material)
+    scene.add(points)
+}
+generateGalaxy()
+
+/**
  * Models
  */
 const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/draco/')
-
 const gltfLoader = new GLTFLoader()
 gltfLoader.setDRACOLoader(dracoLoader)
-
 gltfLoader.load(
     '/models/car.glb',
     (gltf) =>
@@ -74,7 +103,6 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
-
 window.addEventListener('resize', () =>
 {
     // Update sizes
@@ -117,7 +145,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Animate
  */
 const clock = new THREE.Clock()
-
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
@@ -131,5 +158,4 @@ const tick = () =>
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }
-
 tick()
