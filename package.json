@@ -12,6 +12,7 @@
     "vite": "^4.0.4"
   },
   "dependencies": {
+    "lil-gui": "^0.18.0",
     "three": "^0.148.0",
     "vercel": "^28.15.3"
   }

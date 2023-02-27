@@ -2,6 +2,11 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import * as dat from 'lil-gui'
+/**
+ * Debug
+ */
+const gui = new dat.GUI({closeFolders: true})  //To close folders on startup
 
 /**
  * Base
@@ -46,9 +51,17 @@ for(let x = 0; x < cubesXSide; x++) {
 const parameters = {}
 parameters.count = 1000
 parameters.size = 0.02
-
+let geometry = null
+let particlesMaterial = null
+let points = null
 const generateGalaxy = () => {
-    const geometry = new THREE.BufferGeometry()
+    // Destroy old galaxy
+    if(points !== null) {
+        geometry.dispose()
+        material.dispose()
+        scene.remove(points)
+    }
+    geometry = new THREE.BufferGeometry()
     const positions = new Float32Array(parameters.count * 3)
     for(let i = 0; i < parameters.count; i++) {
         const i3 = i * 3
@@ -58,17 +71,19 @@ const generateGalaxy = () => {
     }
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
-    const material = new THREE.PointsMaterial({
+    particlesMaterial = new THREE.PointsMaterial({
         size: parameters.size,
         sizeAttenuation: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending
     })
 
-    const points = new THREE.Points(geometry, material)
+    points = new THREE.Points(geometry, particlesMaterial)
     scene.add(points)
 }
 generateGalaxy()
+gui.add(parameters, 'count').min(10).max(5000).step(1).onFinishChange(generateGalaxy)
+gui.add(parameters, 'size').min(0.001).max(0.1).step(0.001).onFinishChange(generateGalaxy)
 
 /**
  * Models
@@ -108,11 +123,9 @@ window.addEventListener('resize', () =>
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
-
     // Update camera
     camera.aspect = sizes.width / sizes.height
     camera.updateProjectionMatrix()
-
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -148,13 +161,10 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
-
     // Update controls
     controls.update()
-
     // Render
     renderer.render(scene, camera)
-
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }
